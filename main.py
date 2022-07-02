@@ -125,7 +125,7 @@ def Call_TypeD(list):
     newlist = []
     newlist.append(instruction(list[0]))
     newlist.append(getRegister(list[1]))
-    newlist.append(decimal_to_binary(str(count)))
+    newlist.append(decimal_to_binary(str(l_count+var_lst.index(list[2])+1)))
     answer = ''.join(newlist)
     return answer
 
@@ -134,7 +134,7 @@ def Call_TypeE(list):
     newlist = []
     newlist.append(instruction(list[0]))
     newlist.append("000")
-    newlist.append(decimal_to_binary(str(count)))
+    newlist.append(decimal_to_binary(str(l_count+var_lst.index(list[2])+1)))
     answer = ''.join(newlist)
     return answer
 
@@ -161,15 +161,40 @@ def Call_Func(str, list):
     elif str == "typeF":
         return Call_TypeF(list)
 
+def lastcount():
+    lcount = 0
+    with open("test_cases.txt","r") as f:
+        for line in f:
+            line=line.split()
+            if line[0] == "var":
+                pass
+            else:
+                lcount += 1
+    return lcount-1
+
 
 
 #main function 
 check = 0
 count = 1
+var_lst=[]
+l_count=lastcount()
+
+f=open("test_cases.txt","r")
 while True:
-    cmd = input("Enter the command : ").split()
+    line = f.readline()
+    cmd = line.split()
+    if cmd[0]=="var":
+      var_lst.append(cmd[1])
+    if cmd[0][0:2] == "la":
+        for item in Instruc:
+            if cmd[1] in item:
+                print(Call_Func(item[0], cmd[1:]))
+            else:
+                pass
     if cmd[0] == "hlt":
         print(Call_Func("typeF",cmd))
+        f.close()
         break
     elif cmd[0] == "mov":
         if cmd[2][0] == "$":
@@ -180,7 +205,6 @@ while True:
         for item in Instruc:
             if cmd[0] in item:
                 print(Call_Func(item[0], cmd))
-                print("\n")
                 check = 1
                 break
             else:
@@ -189,5 +213,3 @@ while True:
         #     print("Invalid Instruction")
     check = 0
     count += 1
-
-

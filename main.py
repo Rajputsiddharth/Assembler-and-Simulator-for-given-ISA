@@ -134,7 +134,7 @@ def Call_TypeE(list):
     newlist = []
     newlist.append(instruction(list[0]))
     newlist.append("000")
-    newlist.append(decimal_to_binary(str(l_count+var_lst.index(list[2])+1)))
+    newlist.append(decimal_to_binary(str(l_count+var_lst.index(list[1])+1)))
     answer = ''.join(newlist)
     return answer
 
@@ -180,6 +180,11 @@ count = 1
 var_lst=[]
 l_count=lastcount()
 
+g=open("output_CO.txt","w")
+g.close
+
+g=open("output_CO.txt","a")
+
 f=open("test_cases.txt","r")
 while True:
     line = f.readline()
@@ -189,21 +194,32 @@ while True:
     if cmd[0][0:2] == "la":
         for item in Instruc:
             if cmd[1] in item:
+                g.write(Call_Func(item[0], cmd[1:]))
+                g.write("\n")
                 print(Call_Func(item[0], cmd[1:]))
             else:
                 pass
     if cmd[0] == "hlt":
+        g.write(Call_Func("typeF", cmd))
+        g.write("\n")
         print(Call_Func("typeF",cmd))
         f.close()
+        g.close()
         break
     elif cmd[0] == "mov":
         if cmd[2][0] == "$":
+            g.write(mov_B(cmd))
+            g.write("\n")
             print(mov_B(cmd))
         else:
+            g.write(mov_c(cmd))
+            g.write("\n")
             print(mov_c(cmd))
     else:
         for item in Instruc:
             if cmd[0] in item:
+                g.write(Call_Func(item[0], cmd))
+                g.write("\n")
                 print(Call_Func(item[0], cmd))
                 check = 1
                 break

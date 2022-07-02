@@ -1,5 +1,5 @@
 typeA =["typeA","add","sub","mul","and","or","xor"]
-typeB = ["typeB","mov","ls"]
+typeB = ["typeB","mov","ls","rs"]
 typeC = ["typeC","not","cmp","div","mov"]
 typeD = ["typeD","ld","st"]
 typeE = ["typeE","je","jgt","jlt","jmp"]
@@ -134,7 +134,11 @@ def Call_TypeE(list):
     newlist = []
     newlist.append(instruction(list[0]))
     newlist.append("000")
-    newlist.append(decimal_to_binary(str(l_count+var_lst.index(list[1])+1)))
+    if list[1][0:5] == "label":
+        new_str = list[1] + ":"
+        newlist.append(decimal_to_binary(str(dict_label[new_str])))
+    else:
+        newlist.append(decimal_to_binary(str(l_count+var_lst.index(list[1])+1)))
     answer = ''.join(newlist)
     return answer
 
@@ -173,7 +177,18 @@ def lastcount():
     return lcount-1
 
 
-
+dict_label = {}
+counter = -1
+with open("test_cases.txt","r") as f:
+    while True:
+        line = f.readline()
+        line=line.split()
+        if line[0] != "var":
+            counter += 1
+        if line[0][0:5] == "label":
+            dict_label[line[0][0::]] = counter
+        if line[0] == "hlt":
+            break
 #main function 
 check = 0
 count = 1

@@ -199,7 +199,7 @@ def isRegister(reg):
     dict_reg = {
         "R0": "000","R1": "001","R2": "010","R3": "011","R4": "100","R5": "101","R6": "110","FLAGS": "111"
     }
-    if reg in dict_reg:
+    if reg in dict_reg and reg != "FLAGS":
         return 1
     else:
         return 0
@@ -219,10 +219,10 @@ def Error():
         line = line.split()
         if len(line) == 0:
             pass
-
         else:
             lst.append(line)
     k.close()
+    
     for i in range(len(lst)):
         if lst[i][0] == "var":
             if len(lst[i]) != 2:
@@ -244,64 +244,106 @@ def Error():
         # elif ":" in lst[i][0] and (lst[i][0][:-1]).isidentifier():
 
         elif lst[i][0] == "mov" and lst[i][2][0]=="$":
-            if isRegister(lst[i][1])==0 :
-                print(f'Error in line,{i+1} : not a valid register')
-                quit()
-            elif isRegister(lst[i][1])==1 and isImmediate(lst[i][2])==0:
-                print(f'Error in line,{i+1} : not a valid immediate')
+            if len(lst[i]) == 3:
+                if isRegister(lst[i][1])==0 :
+                    print(f'Error in line,{i+1} : not a valid register')
+                    quit()
+                elif isRegister(lst[i][1])==1 and isImmediate(lst[i][2])==0:
+                    print(f'Error in line,{i+1} : not a valid immediate')
+                    quit()
+            else:
+                print(f'Error in line {i+1} : Invalid format of instruction')
                 quit()
 
      #To seperate out mov commands as they might create problems in Instruc[] loop.
-        elif lst[i][0] == "mov" and lst[i][2][0]!="$":
-            if isRegister(lst[i][1])==1 and isRegister(lst[i][2])==1:
-                pass
-            elif lst[i][1]=="FLAGS" and isRegister(lst[i][2])==1:
-                pass
-        
-            elif "FLAGS" in lst[i]:
-                print(f'Error in line,{i+1} : invalid use of flags')
-                quit()
+        elif lst[i][0] == "mov" and lst[i][2][0]!= "$":
+            if len(lst[i]) == 3:
+                    
+                if isRegister(lst[i][1])==1 and isRegister(lst[i][2])==1:
+                    pass
+                elif lst[i][1]=="FLAGS" and isRegister(lst[i][2])==1:
+                    pass
+            
+                elif "FLAGS" in lst[i]:
+                    print(f'Error in line,{i+1} : invalid use of flags')
+                    quit()
+                else:
+                    print(f'Error in line,{i+1} : not a valid register')
+                    quit()
             else:
-                print(f'Error in line,{i+1} : not a valid register')
+                print(f'Error in line {i+1} : Invalid format of instruction')
                 quit()
+
 
         elif lst[i][0] in Instruc[0] or lst[i][0] in Instruc[1] or lst[i][0] in Instruc[2] or lst[i][0] in Instruc[3] or lst[i][0] in Instruc[4] or lst[i][0] in Instruc[5]:
             Flaag=1
             if lst[i][0] in Instruc[0]:
-                if isRegister(lst[i][1])==0 or isRegister(lst[i][2])==0 or isRegister(lst[i][3])==0:
-                    print(f'Error in line {i+1} : not a valid register')
+                if len(lst[i]) == 4:
+                    if isRegister(lst[i][1])==0 or isRegister(lst[i][2])==0 or isRegister(lst[i][3])==0:
+                        print(f'Error in line {i+1} : not a valid register')
+                        quit()
+                else:
+                    print(f'Error in line {i+1} : Invalid format of instruction')
                     quit()
+
             elif lst[i][0] in Instruc[1]:
-                if isRegister(lst[i][1])==0 :
-                    print(f'Error in line {i+1} : not a valid register')
+                if len(lst[i]) == 3:
+                    if isRegister(lst[i][1])==0 :
+                        print(f'Error in line {i+1} : not a valid register')
+                        quit()
+                    elif isRegister(lst[i][1])==1 and isImmediate(lst[i][2])==0:
+                        print(f'Error in line {i+1} : not a valid immediate')
+                        quit()
+                else:
+                    print(f'Error in line {i+1} : Invalid format of instruction')
                     quit()
-                elif isRegister(lst[i][1])==1 and isImmediate(lst[i][2])==0:
-                    print(f'Error in line {i+1} : not a valid immediate')
-                    quit()
-            
+
             elif lst[i][0] in Instruc[2]:
-                if isRegister(lst[i][1])==0 or isRegister(lst[i][2])==0:
-                    print(f'Error in line,{i+1} : not a valid register')
+                if len(lst[i]) == 3:
+                    if isRegister(lst[i][1])==0 or isRegister(lst[i][2])==0:
+                        print(f'Error in line,{i+1} : not a valid register')
+                        quit()
+                else:
+                    print(f'Error in line {i+1} : Invalid format of instruction')
                     quit()
+
             elif lst[i][0] in Instruc[3]:
-                if isRegister(lst[i][1])==0:
-                    print(f'Error in line {i+1} : not a valid register')
+                if len(lst[i]) == 3:
+                    if isRegister(lst[i][1])==0:
+                        print(f'Error in line {i+1} : not a valid register')
+                        quit()
+                    elif isRegister(lst[i][1])==1 and lst[i][2] not in var_lst:
+                        print(f'Error in line {i+1} : variable not declared')
+                        quit()
+                else:
+                    print(f'Error in line {i+1} : Invalid format of instruction')
                     quit()
-                elif isRegister(lst[i][1])==1 and lst[i][2] not in var_lst:
-                    print(f'Error in line {i+1} : variable not declared')
-                    quit()
+
             elif lst[i][0] in Instruc[4]:
-                if lst[i][1]==1 not in dict_label.keys():
-                    print(f'Error in line {i+1} : label not declared')
+                if len(lst[i]) == 2:
+                    if lst[i][1]==1 not in dict_label.keys():
+                        print(f'Error in line {i+1} : label not declared')
+                        quit()
+                else:
+                    print(f'Error in line {i+1} : Invalid format of instruction')
                     quit()
+
             elif lst[i][0] in Instruc[5]:
-                if i != len(lst)-1:
-                    print(f"Error in line {i+1} : hlt not used as last instruction.")
+                if len(lst[i]) == 1:
+
+                    if i != len(lst)-1:
+                        print(f"Error in line {i+1} : hlt not used as last instruction.")
+                        quit()
+                else:
+                    print(f'Error in line {i+1} : Invalid format of instruction')
                     quit()
+
         else:
             print(f'Error in line,{i+1} : General syntax error')
             quit()
-    if lst[-1][0]!= "hlt":
+    if lst[-1][0] == "hlt":
+        pass
+    else:
         print(f"Error in last line: hlt missing")
         quit()
        
@@ -310,19 +352,19 @@ def Error():
 #main function 
 dict_label = {}
 counter = -1
-with open("test_cases.txt","r") as f:
-    for l in f:
-        line = l
-        line=line.split()
-        if len(line) == 0:
-            pass
-        else:
-            if line[0] != "var":
-                counter += 1
-            if line[0][0:5] == "label":
-                dict_label[line[0][0::]] = counter
-            if line[0] == "hlt":
-                break
+f =  open("test_cases.txt","r")
+for l in f:
+    line = l
+    line=line.split()
+    if len(line) == 0:
+        pass
+    else:
+        if line[0] != "var":
+            counter += 1
+        if line[0][-1] == ":":
+            dict_label[line[0][0::]] = counter
+        if line[0] == "hlt":
+            break
 check = 0
 count = 1
 var_lst=[]

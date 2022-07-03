@@ -21,7 +21,6 @@ def getRegister(reg):
 
     return dict_reg[reg]
 
-
 #Function to get encoding of instruction
 def instruction(ins):
     dict_ins = {
@@ -50,9 +49,6 @@ def instruction(ins):
     return dict_ins[ins]
 
 
-#function to convert decimal to binary
-
-
 #Function decimal to binary
 def decimal_to_binary(dec):
     dec = int(dec)
@@ -64,9 +60,6 @@ def decimal_to_binary(dec):
     while (len(bin) < 8):
         bin = "0" + bin
     return bin
-
-
-#function to return type
 
 
 #type of function to return 16 bit encodings
@@ -130,6 +123,7 @@ def Call_TypeD(list):
     return answer
 
 
+
 def Call_TypeE(list):
     newlist = []
     newlist.append(instruction(list[0]))
@@ -141,6 +135,7 @@ def Call_TypeE(list):
         newlist.append(decimal_to_binary(str(l_count+var_lst.index(list[1])+1)))
     answer = ''.join(newlist)
     return answer
+
 
 
 def Call_TypeF(list):
@@ -170,31 +165,169 @@ def lastcount():
     with open("test_cases.txt","r") as f:
         for line in f:
             line=line.split()
-            if line[0] == "var":
+            if len(line) == 0:
                 pass
             else:
-                lcount += 1
+                if line[0] == "var":
+                    pass
+                else:
+                    lcount += 1
     return lcount-1
 
 
+
+
+
+
+
+
+def isImmediate(imm):
+    if imm[0]=="$":
+        if imm[1:].isdigit()==True:
+            if int(imm[1:])>=0 and int(imm[1:])<=255:
+                return True
+            else:
+                return False
+        else:
+            return False
+    else:
+        return False
+
+
+
+def isRegister(reg):
+    dict_reg = {
+        "R0": "000","R1": "001","R2": "010","R3": "011","R4": "100","R5": "101","R6": "110","FLAGS": "111"
+    }
+    if reg in dict_reg:
+        return 1
+    else:
+        return 0
+
+
+
+
+def Error():
+    E=0
+    Flaag=0
+    k=open("test_cases.txt","r")
+    lst=[]
+    lst_str=[]
+    for line in k:
+        lst_str.append(line)
+        line = line.strip()
+        line = line.split()
+        if len(line) == 0:
+            pass
+
+        else:
+            lst.append(line)
+    k.close()
+    for i in range(len(lst)):
+        if lst[i][0] == "var":
+            if len(lst[i]) != 2:
+                print(f"Error in line {i+1}: var statement does not follow the syntax")
+                quit()
+            if Flaag==1:
+                print(f'Error in line {i+1} : Variables should be declared in the beginning') 
+                quit()
+            else:
+                if (lst[i][1]).isidentifier():
+                    pass
+                else:
+                  print(f'Error in line {i+1} : not a valid variable name')
+                  quit()
+
+        # if ":" in lst[i][0] and not((lst[i][0][:-1]).isidentifier()):
+        #     print(f'Error in line {i+1} : Illegal label name') 
+        #     quit()
+        # elif ":" in lst[i][0] and (lst[i][0][:-1]).isidentifier():
+
+        elif lst[i][0] == "mov" and lst[i][2][0]=="$":
+            if isRegister(lst[i][1])==0 :
+                print(f'Error in line,{i+1} : not a valid register')
+                quit()
+            elif isRegister(lst[i][1])==1 and isImmediate(lst[i][2])==0:
+                print(f'Error in line,{i+1} : not a valid immediate')
+                quit()
+
+     #To seperate out mov commands as they might create problems in Instruc[] loop.
+        elif lst[i][0] == "mov" and lst[i][2][0]!="$":
+            if isRegister(lst[i][1])==1 and isRegister(lst[i][2])==1:
+                pass
+            elif lst[i][1]=="FLAGS" and isRegister(lst[i][2])==1:
+                pass
+        
+            elif "FLAGS" in lst[i]:
+                print(f'Error in line,{i+1} : invalid use of flags')
+                quit()
+            else:
+                print(f'Error in line,{i+1} : not a valid register')
+                quit()
+
+        elif lst[i][0] in Instruc[0] or lst[i][0] in Instruc[1] or lst[i][0] in Instruc[2] or lst[i][0] in Instruc[3] or lst[i][0] in Instruc[4] or lst[i][0] in Instruc[5]:
+            Flaag=1
+            if lst[i][0] in Instruc[0]:
+                if isRegister(lst[i][1])==0 or isRegister(lst[i][2])==0 or isRegister(lst[i][3])==0:
+                    print(f'Error in line {i+1} : not a valid register')
+                    quit()
+            elif lst[i][0] in Instruc[1]:
+                if isRegister(lst[i][1])==0 :
+                    print(f'Error in line {i+1} : not a valid register')
+                    quit()
+                elif isRegister(lst[i][1])==1 and isImmediate(lst[i][2])==0:
+                    print(f'Error in line {i+1} : not a valid immediate')
+                    quit()
+            
+            elif lst[i][0] in Instruc[2]:
+                if isRegister(lst[i][1])==0 or isRegister(lst[i][2])==0:
+                    print(f'Error in line,{i+1} : not a valid register')
+                    quit()
+            elif lst[i][0] in Instruc[3]:
+                if isRegister(lst[i][1])==0:
+                    print(f'Error in line {i+1} : not a valid register')
+                    quit()
+                elif isRegister(lst[i][1])==1 and lst[i][2] not in var_lst:
+                    print(f'Error in line {i+1} : variable not declared')
+                    quit()
+            elif lst[i][0] in Instruc[4]:
+                if lst[i][1]==1 not in dict_label.keys():
+                    print(f'Error in line {i+1} : label not declared')
+                    quit()
+            elif lst[i][0] in Instruc[5]:
+                if i != len(lst)-1:
+                    print(f"Error in line {i+1} : hlt not used as last instruction.")
+                    quit()
+        else:
+            print(f'Error in line,{i+1} : General syntax error')
+            quit()
+    if lst[-1][0]!= "hlt":
+        print(f"Error in last line: hlt missing")
+        quit()
+       
+
+
+#main function 
 dict_label = {}
 counter = -1
 with open("test_cases.txt","r") as f:
-    while True:
-        line = f.readline()
+    for l in f:
+        line = l
         line=line.split()
-        if line[0] != "var":
-            counter += 1
-        if line[0][0:5] == "label":
-            dict_label[line[0][0::]] = counter
-        if line[0] == "hlt":
-            break
-#main function 
+        if len(line) == 0:
+            pass
+        else:
+            if line[0] != "var":
+                counter += 1
+            if line[0][0:5] == "label":
+                dict_label[line[0][0::]] = counter
+            if line[0] == "hlt":
+                break
 check = 0
 count = 1
 var_lst=[]
 l_count=lastcount()
-
+Error()
 g=open("output_CO.txt","w")
 g.close
 
@@ -204,43 +337,46 @@ f=open("test_cases.txt","r")
 while True:
     line = f.readline()
     cmd = line.split()
-    if cmd[0]=="var":
-      var_lst.append(cmd[1])
-    if cmd[0][0:2] == "la":
-        for item in Instruc:
-            if cmd[1] in item:
-                g.write(Call_Func(item[0], cmd[1:]))
-                g.write("\n")
-                print(Call_Func(item[0], cmd[1:]))
-            else:
-                pass
-    if cmd[0] == "hlt":
-        g.write(Call_Func("typeF", cmd))
-        g.write("\n")
-        print(Call_Func("typeF",cmd))
-        f.close()
-        g.close()
-        break
-    elif cmd[0] == "mov":
-        if cmd[2][0] == "$":
-            g.write(mov_B(cmd))
+    if len(cmd) != 0:
+        if cmd[0]=="var":
+            var_lst.append(cmd[1])
+        if cmd[0][0:2] == "la":
+            for item in Instruc:
+                if cmd[1] in item:
+                    g.write(Call_Func(item[0], cmd[1:]))
+                    g.write("\n")
+                    print(Call_Func(item[0], cmd[1:]))
+                else:
+                    pass
+        if cmd[0] == "hlt":
+            g.write(Call_Func("typeF", cmd))
             g.write("\n")
-            print(mov_B(cmd))
+            print(Call_Func("typeF",cmd))
+            f.close()
+            g.close()
+            break
+        elif cmd[0] == "mov":
+            if cmd[2][0] == "$":
+                g.write(mov_B(cmd))
+                g.write("\n")
+                print(mov_B(cmd))
+            else:
+                g.write(mov_c(cmd))
+                g.write("\n")
+                print(mov_c(cmd))
         else:
-            g.write(mov_c(cmd))
-            g.write("\n")
-            print(mov_c(cmd))
+            for item in Instruc:
+                if cmd[0] in item:
+                    g.write(Call_Func(item[0], cmd))
+                    g.write("\n")
+                    print(Call_Func(item[0], cmd))
+                    check = 1
+                    break
+                else:
+                    pass
+            # if check==0:     #if the command is not found in the list of instructions
+            #     print("Invalid Instruction")
+        check = 0
+        count += 1
     else:
-        for item in Instruc:
-            if cmd[0] in item:
-                g.write(Call_Func(item[0], cmd))
-                g.write("\n")
-                print(Call_Func(item[0], cmd))
-                check = 1
-                break
-            else:
-                pass
-        # if check==0:     #if the command is not found in the list of instructions
-        #     print("Invalid Instruction")
-    check = 0
-    count += 1
+        pass

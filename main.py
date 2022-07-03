@@ -128,11 +128,7 @@ def Call_TypeE(list):
     newlist = []
     newlist.append(instruction(list[0]))
     newlist.append("000")
-    if list[1][0:5] == "label":
-        new_str = list[1] + ":"
-        newlist.append(decimal_to_binary(str(dict_label[new_str])))
-    else:
-        newlist.append(decimal_to_binary(str(l_count+var_lst.index(list[1])+1)))
+    newlist.append(decimal_to_binary(str(dict_label[list[1]+":"])))
     answer = ''.join(newlist)
     return answer
 
@@ -256,7 +252,7 @@ def Error():
                             if len(lst[i][1:]) == 3:
                                 if isRegister(lst[i][1:][1])==1 and isRegister(lst[i][1:][2])==1:
                                     pass
-                                elif lst[i][1:][2]=="FLAGS" and isRegister(lst[i][1:][1])==1:
+                                elif lst[i][1:][1]=="FLAGS" and isRegister(lst[i][1:][2])==1:
                                     pass
                             
                                 elif "FLAGS" in lst[i][1:]:
@@ -344,7 +340,7 @@ def Error():
                     
                 if isRegister(lst[i][1])==1 and isRegister(lst[i][2])==1:
                     pass
-                elif lst[i][2]=="FLAGS" and isRegister(lst[i][1])==1:
+                elif lst[i][1]=="FLAGS" and isRegister(lst[i][2])==1:
                     pass
             
                 elif "FLAGS" in lst[i]:
@@ -493,6 +489,13 @@ while True:
             f.close()
             g.close()
             break
+        elif cmd[-1]=="hlt":
+            g.write(Call_Func("typeF", cmd[1:]))
+            g.write("\n")
+            print(Call_Func("typeF",cmd[1:]))
+            f.close()
+            g.close()
+            break
         elif cmd[0] == "mov":
             if cmd[2][0] == "$":
                 g.write(mov_B(cmd))
@@ -512,8 +515,6 @@ while True:
                     break
                 else:
                     pass
-            # if check==0:     #if the command is not found in the list of instructions
-            #     print("Invalid Instruction")
         check = 0
         count += 1
     else:

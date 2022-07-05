@@ -1,3 +1,6 @@
+import sys
+fininp=[i.split() for i in sys.stdin.readlines()]
+
 typeA =["typeA","add","sub","mul","and","or","xor"]
 typeB = ["typeB","mov","ls","rs"]
 typeC = ["typeC","not","cmp","div","mov"]
@@ -6,24 +9,7 @@ typeE = ["typeE","je","jgt","jlt","jmp"]
 typeF = ["typeF","hlt"]
 Instruc = [typeA, typeB, typeC, typeD, typeE, typeF]
 
-#Function to get encoding of register
-def getRegister(reg):
-    dict_reg = {
-        "R0": "000",
-        "R1": "001",
-        "R2": "010",
-        "R3": "011",
-        "R4": "100",
-        "R5": "101",
-        "R6": "110",
-        "FLAGS": "111"
-    }
-
-    return dict_reg[reg]
-
-#Function to get encoding of instruction
-def instruction(ins):
-    dict_ins = {
+dict_ins = {
         "add": "10000",
         "sub": "10001",
         "mul": "10110",
@@ -46,6 +32,24 @@ def instruction(ins):
         "mov2": "10011"
     }
 
+#Function to get encoding of register
+def getRegister(reg):
+    dict_reg = {
+        "R0": "000",
+        "R1": "001",
+        "R2": "010",
+        "R3": "011",
+        "R4": "100",
+        "R5": "101",
+        "R6": "110",
+        "FLAGS": "111"
+    }
+
+    return dict_reg[reg]
+
+#Function to get encoding of instruction
+def instruction(ins):
+    global dict_ins
     return dict_ins[ins]
 
 
@@ -158,24 +162,15 @@ def Call_Func(str, list):
 
 def lastcount():
     lcount = 0
-    with open("test_cases.txt","r") as f:
-        for line in f:
-            line=line.split()
-            if len(line) == 0:
+    for i in fininp:
+        if len(i)==0:
+            pass
+        else:
+            if i[0] == "var":
                 pass
             else:
-                if line[0] == "var":
-                    pass
-                else:
-                    lcount += 1
+                lcount += 1
     return lcount-1
-
-
-
-
-
-
-
 
 def isImmediate(imm):
     if imm[0]=="$":
@@ -202,18 +197,12 @@ def isRegister(reg):
 
 def Error():
     Flaag=0
-    k=open("test_cases.txt","r")
     lst=[]
-    lst_str=[]
-    for line in k:
-        lst_str.append(line)
-        line = line.strip()
-        line = line.split()
-        if len(line) == 0:
+    for i in fininp:
+        if len(i)==0:
             pass
         else:
-            lst.append(line)
-    k.close()
+            lst.append(i)
     
     for i in range(len(lst)):
         if lst[i][0] == "var":
@@ -224,7 +213,7 @@ def Error():
                 print(f'Error in line {i+1} : Variables should be declared in the beginning') 
                 quit()
             else:
-                if (lst[i][1]).isidentifier():
+                if (lst[i][1]).isidentifier() and lst[i][1] not in dict_ins.keys():
                     pass
                 else:
                   print(f'Error in line {i+1} : not a valid variable name')
@@ -311,6 +300,9 @@ def Error():
                 
                             elif lst[i][1:][0] in Instruc[4]:
                                 if len(lst[i][1:]) == 2:
+                                    if lst[i][1:][1] in var_lst:
+                                        print(f'Error in line {i+1} : Use of variable instead of label')
+                                        quit()                          
                                     if (lst[i][1:][1] + ":") not in dict_label.keys():
                                         print(f'Error in line {i+1} : label not declared')
                                         quit()
@@ -400,6 +392,9 @@ def Error():
 
             elif lst[i][0] in Instruc[4]:
                 if len(lst[i]) == 2:
+                    if lst[i][1] in var_lst:
+                        print(f'Error in line {i+1} : Use of variable instead of label')
+                        quit()
                     if (lst[i][1] + ":") not in dict_label.keys():
                         print(f'Error in line {i+1} : label not declared')
                         quit()
@@ -427,40 +422,30 @@ def Error():
         quit()
        
 
-
 #main function 
 dict_label = {}
 var_lst=[]
 counter = -1
-f =  open("test_cases.txt","r")
-for l in f:
-    line = l
-    line=line.split()
-    if len(line) == 0:
+for i in fininp:
+    if len(i)==0:
         pass
     else:
-        if line[0] == "var" and len(line) == 2:
-          var_lst.append(line[1])
-        if line[0] != "var":
+        if i[0] == "var" and len(i) == 2:
+            var_lst.append(i[1])
+        if i[0] != "var":
             counter += 1
-        if line[0][-1] == ":":
-            dict_label[line[0][0::]] = counter
-        if line[0] == "hlt":
+        if i[0][-1] == ":":
+            dict_label[i[0][0::]] = counter
+        if i[0] == "hlt":
             break
+
 check = 0
 count = 1
 l_count=lastcount()
 Error()
 var_lst=[]
-g=open("output_CO.txt","w")
-g.close
 
-g=open("output_CO.txt","a")
-
-f=open("test_cases.txt","r")
-while True:
-    line = f.readline()
-    cmd = line.split()
+for cmd in fininp:
     if len(cmd) != 0:
         if cmd[0]=="var":
             var_lst.append(cmd[1])
@@ -469,47 +454,27 @@ while True:
                 if cmd[1] in item:
                     if cmd[1] == "mov":
                         if cmd[3][0] == "$":
-                            g.write(mov_B(cmd[1:]))
-                            g.write("\n")
                             print(mov_B(cmd[1:]))
                         else:
-                            g.write(mov_c(cmd[1:]))
-                            g.write("\n")
                             print(mov_c(cmd[1:]))
                     else:
-                        g.write(Call_Func(item[0], cmd[1:]))
-                        g.write("\n")
                         print(Call_Func(item[0], cmd[1:]))
                 else:
                     pass
         if cmd[0] == "hlt":
-            g.write(Call_Func("typeF", cmd))
-            g.write("\n")
             print(Call_Func("typeF",cmd))
-            f.close()
-            g.close()
             break
         elif cmd[-1]=="hlt":
-            g.write(Call_Func("typeF", cmd[1:]))
-            g.write("\n")
             print(Call_Func("typeF",cmd[1:]))
-            f.close()
-            g.close()
             break
         elif cmd[0] == "mov":
             if cmd[2][0] == "$":
-                g.write(mov_B(cmd))
-                g.write("\n")
                 print(mov_B(cmd))
             else:
-                g.write(mov_c(cmd))
-                g.write("\n")
                 print(mov_c(cmd))
         else:
             for item in Instruc:
                 if cmd[0] in item:
-                    g.write(Call_Func(item[0], cmd))
-                    g.write("\n")
                     print(Call_Func(item[0], cmd))
                     check = 1
                     break

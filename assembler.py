@@ -536,7 +536,7 @@ for cmd in fininp:
                         print(Call_Func(item[0], cmd[1:]))
                 else:
                     pass
-        if cmd[0] == "hlt":
+        elif cmd[0] == "hlt":
             print(Call_Func("typeF", cmd))
             break
         elif cmd[-1] == "hlt":
